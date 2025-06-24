@@ -72,7 +72,7 @@ public class BookingTest extends BaseTest{
                 """;
 
         //EFETUAR RESERVA
-        Integerq idReserva =
+        Integer idReserva =
         given()
                 .contentType("application/json")
                 .body(json)
@@ -97,5 +97,45 @@ public class BookingTest extends BaseTest{
                 .log().all()
                 .statusCode(200)
                 .body("firstname", notNullValue());
+    }
+
+    @Test
+    public void deeveEfetuarReserva(){
+        String firstname = "Jim";
+        String lastname = "Brown";
+        Integer totalprice = 111;
+        Boolean depositpaid = true;
+
+
+        String json = """
+                    {
+                        "firstname" : "%s",
+                        "lastname" : "%s",
+                        "totalprice" : %s,
+                        "depositpaid" : %s,
+                        "bookingdates" : {
+                            "checkin" : "2018-01-01",
+                            "checkout" : "2019-01-01"
+                        },
+                        "additionalneeds" : "Breakfast"
+                    }
+                """.formatted(firstname, lastname, totalprice, depositpaid);
+
+        //EFETUAR RESERVA
+        given()
+                .contentType("application/json")
+                .body(json)
+                .header("Cookie", "token=" + token)
+                .log().all()
+                .when()
+                .post("/booking")
+                .then()
+                .log().all()
+                .statusCode(200)
+                .body("booking.firstname", equalTo(firstname))
+                .body("booking.lastname", equalTo(lastname))
+                .body("booking.totalprice", equalTo(totalprice))
+                .body("booking.depositpaid", equalTo(depositpaid))
+                .body("booking.bookingdates", notNullValue());
     }
 }
