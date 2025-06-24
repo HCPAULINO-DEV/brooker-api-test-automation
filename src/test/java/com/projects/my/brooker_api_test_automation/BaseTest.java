@@ -21,7 +21,7 @@ public class BaseTest {
                                 }
                 """;
 
-        String token =
+        token =
                 given()
                         .contentType("application/json")
                         .body(json)
@@ -31,5 +31,7 @@ public class BaseTest {
                         .statusCode(200)
                         .extract()
                         .path("token");
+
     }
+
 }
