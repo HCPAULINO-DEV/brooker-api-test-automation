@@ -4,8 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 
 public class BookingTest extends BaseTest{
 
@@ -54,6 +53,49 @@ public class BookingTest extends BaseTest{
                 .statusCode(200)
                 .body("bookingid", not(empty()));
 
+    }
 
+    @Test
+    public void deveRetornarReservaPeloId(){
+        String json = """
+                    {
+                        "firstname" : "Jim",
+                        "lastname" : "Brown",
+                        "totalprice" : 111,
+                        "depositpaid" : true,
+                        "bookingdates" : {
+                            "checkin" : "2018-01-01",
+                            "checkout" : "2019-01-01"
+                        },
+                        "additionalneeds" : "Breakfast"
+                    }
+                """;
+
+        //EFETUAR RESERVA
+        Integerq idReserva =
+        given()
+                .contentType("application/json")
+                .body(json)
+                .header("Cookie", "token=" + token)
+                .log().all()
+                .when()
+                .post("/booking")
+                .then()
+                .log().all()
+                .statusCode(200)
+                .extract()
+                .path("bookingid");
+
+        //RETORNAR RESERVA PELO ID
+        given()
+                .accept("application/json")
+                .header("Cookie", "token=" + token)
+                .log().all()
+                .when()
+                .get("/booking/" + idReserva)
+                .then()
+                .log().all()
+                .statusCode(200)
+                .body("firstname", notNullValue());
     }
 }
