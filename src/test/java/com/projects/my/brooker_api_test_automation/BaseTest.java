@@ -11,7 +11,7 @@ public class BaseTest {
     protected static String token;
 
     @BeforeAll
-    public static void setup(){
+    protected static void realizarLogin(){
         RestAssured.baseURI = "https://restful-booker.herokuapp.com";
 
         String json = """
