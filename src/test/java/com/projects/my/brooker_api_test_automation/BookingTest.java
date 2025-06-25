@@ -196,6 +196,64 @@ public class BookingTest extends BaseTest{
     }
 
     @Test
+    public void deveAtualizarReservaParcialmentePeloId(){
+        ReservaJson reserva = jsonReserva();
+
+        //EFETUAR RESERVA
+        Integer idReserva =
+                given()
+                        .contentType("application/json")
+                        .body(reserva.json)
+                        .header("Cookie", "token=" + token)
+                        .log().all()
+                        .when()
+                        .post("/booking")
+                        .then()
+                        .log().all()
+                        .statusCode(200)
+                        .extract()
+                        .path("bookingid");
+
+        //ATUALIZAR RESERVA
+        String firstname = "Jim-Updated";
+        String lastname = "Brown-Updated";
+
+
+        String jsonAtualizado = """
+                    {
+                        "firstname" : "%s",
+                        "lastname" : "%s"
+                    }
+                """.formatted(firstname, lastname);
+
+        given()
+                .contentType("application/json")
+                .header("Cookie", "token=" + token)
+                .body(jsonAtualizado)
+                .log().all()
+                .when()
+                .patch("/booking/" + idReserva)
+                .then()
+                .log().all()
+                .statusCode(200)
+                .body("firstname", equalTo(firstname))
+                .body("lastname", equalTo(lastname));
+
+        //VERIFICAR RESERVA ATUALIZADA
+        given()
+                .accept("application/json")
+                .header("Cookie", "token=" + token)
+                .log().all()
+                .when()
+                .get("/booking/" + idReserva)
+                .then()
+                .log().all()
+                .statusCode(200)
+                .body("firstname", equalTo(firstname))
+                .body("lastname", equalTo(lastname));
+    }
+
+    @Test
     public void deveDeletarReservaPeloId(){
         ReservaJson reserva = jsonReserva();
 
