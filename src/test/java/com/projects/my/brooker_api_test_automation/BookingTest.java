@@ -194,4 +194,33 @@ public class BookingTest extends BaseTest{
                 .body("depositpaid", equalTo(depositpaid))
                 .body("bookingdates", notNullValue());
     }
+
+    @Test
+    public void deveDeletarReservaPeloId(){
+        ReservaJson reserva = jsonReserva();
+
+        //EFETUAR RESERVA
+        Integer idReserva =
+        given()
+                .contentType("application/json")
+                .header("Cookie", "token=" + token)
+                .body(reserva.json)
+                .when()
+                .post("/booking")
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("bookingid");
+
+        //DELETAR RESERVA
+        given()
+                .accept("application/json")
+                .header("Cookie", "token=" + token)
+                .log().all()
+                .when()
+                .delete("/booking/" + idReserva)
+                .then()
+                .log().all()
+                .statusCode(20);    //BUG ENCONTRADO - RETORNAR STATUS CODE 200 MAS DEVERIA RETORNAR 201
+    }
 }
