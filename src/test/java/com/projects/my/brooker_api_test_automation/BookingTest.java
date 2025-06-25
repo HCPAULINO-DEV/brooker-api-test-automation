@@ -13,26 +13,39 @@ public class BookingTest extends BaseTest{
         realizarLogin();
     }
 
-    @Test
-    public void deveRetornarIdsDeTodasReservas(){
+    private record ReservaJson(String json, String firstname, String lastname, Integer totalprice, Boolean depositpaid){}
+
+    private ReservaJson jsonReserva(){
+        String firstname = "Jim";
+        String lastname = "Brown";
+        Integer totalprice = 111;
+        Boolean depositpaid = true;
+
         String json = """
                     {
-                        "firstname" : "Jim",
-                        "lastname" : "Brown",
-                        "totalprice" : 111,
-                        "depositpaid" : true,
+                        "firstname" : "%s",
+                        "lastname" : "%s",
+                        "totalprice" : %s,
+                        "depositpaid" : %s,
                         "bookingdates" : {
                             "checkin" : "2018-01-01",
                             "checkout" : "2019-01-01"
                         },
                         "additionalneeds" : "Breakfast"
                     }
-                """;
+                """.formatted(firstname, lastname, totalprice, depositpaid);
+
+        return new ReservaJson(json, firstname, lastname, totalprice, depositpaid);
+    }
+
+    @Test
+    public void deveRetornarIdsDeTodasReservas(){
+        ReservaJson reserva = jsonReserva();
 
         //EFETUAR RESERVA
         given()
                 .contentType("application/json")
-                .body(json)
+                .body(reserva.json)
                 .header("Cookie", "token=" + token)
                 .log().all()
                 .when()
@@ -57,25 +70,13 @@ public class BookingTest extends BaseTest{
 
     @Test
     public void deveRetornarReservaPeloId(){
-        String json = """
-                    {
-                        "firstname" : "Jim",
-                        "lastname" : "Brown",
-                        "totalprice" : 111,
-                        "depositpaid" : true,
-                        "bookingdates" : {
-                            "checkin" : "2018-01-01",
-                            "checkout" : "2019-01-01"
-                        },
-                        "additionalneeds" : "Breakfast"
-                    }
-                """;
+        ReservaJson reserva = jsonReserva();
 
         //EFETUAR RESERVA
         Integer idReserva =
         given()
                 .contentType("application/json")
-                .body(json)
+                .body(reserva.json)
                 .header("Cookie", "token=" + token)
                 .log().all()
                 .when()
@@ -101,30 +102,12 @@ public class BookingTest extends BaseTest{
 
     @Test
     public void deveEfetuarReserva(){
-        String firstname = "Jim";
-        String lastname = "Brown";
-        Integer totalprice = 111;
-        Boolean depositpaid = true;
-
-
-        String json = """
-                    {
-                        "firstname" : "%s",
-                        "lastname" : "%s",
-                        "totalprice" : %s,
-                        "depositpaid" : %s,
-                        "bookingdates" : {
-                            "checkin" : "2018-01-01",
-                            "checkout" : "2019-01-01"
-                        },
-                        "additionalneeds" : "Breakfast"
-                    }
-                """.formatted(firstname, lastname, totalprice, depositpaid);
+        ReservaJson reserva = jsonReserva();
 
         //EFETUAR RESERVA
         given()
                 .contentType("application/json")
-                .body(json)
+                .body(reserva.json)
                 .header("Cookie", "token=" + token)
                 .log().all()
                 .when()
@@ -132,34 +115,22 @@ public class BookingTest extends BaseTest{
                 .then()
                 .log().all()
                 .statusCode(200)
-                .body("booking.firstname", equalTo(firstname))
-                .body("booking.lastname", equalTo(lastname))
-                .body("booking.totalprice", equalTo(totalprice))
-                .body("booking.depositpaid", equalTo(depositpaid))
+                .body("booking.firstname", equalTo(reserva.firstname))
+                .body("booking.lastname", equalTo(reserva.lastname))
+                .body("booking.totalprice", equalTo(reserva.totalprice))
+                .body("booking.depositpaid", equalTo(reserva.depositpaid))
                 .body("booking.bookingdates", notNullValue());
     }
 
     @Test
     public void deveAtualizarReserva(){
-        String jsonDesatualizado = """
-                    {
-                        "firstname" : "Jim",
-                        "lastname" : "Brown",
-                        "totalprice" : 111,
-                        "depositpaid" : true,
-                        "bookingdates" : {
-                            "checkin" : "2018-01-01",
-                            "checkout" : "2019-01-01"
-                        },
-                        "additionalneeds" : "Breakfast"
-                    }
-                """;
+        ReservaJson reserva = jsonReserva();
 
         //EFETUAR RESERVA
         Integer idReserva =
                 given()
                         .contentType("application/json")
-                        .body(jsonDesatualizado)
+                        .body(reserva.json)
                         .header("Cookie", "token=" + token)
                         .log().all()
                         .when()
